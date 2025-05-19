@@ -30,7 +30,7 @@ class RegisterUserRequest extends BaseFormRequest
       "last_name" => "required|string",
       "role" => [
         'required',
-        Rule::in(['Client', 'Freelancer'])
+        Rule::in(['Admin', 'Normal_User'])
       ],
       "email" => "required|email|unique:users,email",
       "password" => "required|min:6"
