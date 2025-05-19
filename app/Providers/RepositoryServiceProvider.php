@@ -48,62 +48,7 @@ class RepositoryServiceProvider extends ServiceProvider
     $this->app->bind(
       EmailVerificationTokenRepositoryInterface::class, EmailVerificationTokenRepository::class
     );
-
-    $this->app->bind(
-      AdminVerifyWriterRepositoryInterface::class, AdminVerifyWriterRepository::class
-    );
-
-    $this->app->bind(
-      JobsRepositoryInterface::class, JobsRepository::class
-    );
-
-    $this->app->bind(
-      JobAssetsRepositoryInterface::class, JobAssetsRepository::class
-    );
-
-    $this->app->bind(
-      SavedJobsRepositoryInterface::class, SavedJobsRepository::class
-    );
-
-    $this->app->bind(
-      JobsProposalAssetsRepositoryInterface::class, JobsProposalAssetsRepository::class
-    );
-
-    $this->app->bind(
-      JobsPaymentMilestonesRepositoryInterface::class, JobsPaymentMilestonesRepository::class
-    );
-
-    $this->app->bind(
-      JobsProposalRepositoryInterface::class, JobsProposalRepository::class
-    );
-
-    $this->app->bind(
-      DraftJobRepositoryInterface::class, DraftJobRepository::class
-    );
-
-    $this->app->bind(
-      IncomingTransactionRepositoryInterface::class, IncomingTransactionRepository::class
-    );
-
-    $this->app->bind(
-      PaymentTransferRecipientRepositoryInterface::class, PaymentTransferRecipientRepository::class
-    );
-
-    $this->app->bind(
-      OutgoingTransactionRepositoryInterface::class, OutgoingTransactionRepository::class
-    );
-
-    $this->app->bind(
-      PaystackWebhookEventRepositoryInterface::class, PaystackWebhookEventRepository::class
-    );
-
-    $this->app->bind(
-      ManageTestLinkRepositoryInterface::class, ManageTestLinkRepository::class
-    );
-
-    $this->app->bind(
-      WriterPortfolioRepositoryInterface::class, WriterPortfolioRepository::class
-    );
+    
   }
 }
 
