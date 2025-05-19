@@ -1,0 +1,12 @@
+<?php
+
+namespace App\Constants;
+
+class Response
+{
+  const ERR_BAD_PARAMS = "BAD PARAMS";
+  const ERR_INVALID_USER = "INVALID USER";
+  const ERR_NOT_SUCCESSFUL = "REQUEST NOT SUCCESSFUL";
+  const UNAUTHORIZED_ACCESS = "ACCESS DENIED";
+  const NOT_AUTHORIZED = "NOT AUTHORIZED";
+}
