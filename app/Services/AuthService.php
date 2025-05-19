@@ -38,7 +38,7 @@ class AuthService
 
   public function register($params)
   {
-    $params['password'] = app('hash')->make($params['password']);
+    $params['password'] = bcrypt($params['password']);
     DB::beginTransaction();
     try {
       // create the user in the db

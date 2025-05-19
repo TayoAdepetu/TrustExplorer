@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Repositories\Interfaces\EmailVerificationTokenRepositoryInterface;
-use App\Models\EmailVerificationToken;
+use App\Models\APIPasswordResetTokenModel;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -13,17 +13,19 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
 
   public function createToken($email)
   {
-    $email_token = new EmailVerificationToken;
+
+    $email_token = new APIPasswordResetTokenModel;
     $email_token->email = $email;
-    $email_token->token = Str::random(60);
-    $email_token->token_expires_at = Carbon::now()->addMinutes(self::TOKEN_EXPIRATION_MINUTE);
+    $email_token->token_signature = bcrypt(Str::random(16));
+    $email_token->expires_at = Carbon::now()->addMinutes(self::TOKEN_EXPIRATION_MINUTE);
+    $email_token->token_type = 'EMAIL_VERIFICATION_TOKEN';
     $email_token->save();
     return $email_token;
   }
 
   public function findToken($request)
   {
-    return EmailVerificationToken::where([
+    return APIPasswordResetTokenModel::where([
         ['token', $request->token],
         ['email', $request->email]
     ])->first(); 

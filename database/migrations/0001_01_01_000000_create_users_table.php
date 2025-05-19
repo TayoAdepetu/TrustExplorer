@@ -33,11 +33,14 @@ return new class extends Migration
         });
 
         Schema::create('password_resets', function (Blueprint $table) {
-            $table->foreignId('user_ref')->primary();
+            $table->string('email')->primary();
             $table->string('token_signature');
             $table->string('token_type');
             $table->timestamp("expires_at");
             $table->timestamp('created_at')->nullable();
+
+            $table->foreign('email')->references('email')->on('users')->onDelete('cascade');
+
         });
 
         Schema::create('sessions', function (Blueprint $table) {

@@ -10,11 +10,11 @@ class APIPasswordResetTokenModel extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'user_ref',
         'token_type',
         'token_signature',
         'expires_at',
     ];
 
-    protected $table = "api_password_reset_token";
+    protected $table = "password_resets";
 }

@@ -25,12 +25,8 @@ class UserService
 
   public function __construct(
     UserRepositoryInterface $userRepo,
-    WriterPortfolioRepositoryInterface $portfolioRepo,
-    JobsProposalRepositoryInterface $jobsProposalRepository
   ) {
     $this->userRepo = $userRepo;
-    $this->portfolioRepo = $portfolioRepo;
-    $this->jobsProposalRepository = $jobsProposalRepository;
   }
 
   public function updateUserDetails($params, $user_id)
@@ -91,80 +87,6 @@ class UserService
   public function getVerifiedWritersProfile()
   {
     return $this->userRepo->getVerifiedWriters();
-  }
-
-  public function clientSubmitIdVerification($client, $params)
-  {
-    if (isset($params['file'])) {
-      DB::beginTransaction();
-      try {
-        // upload ID
-        $file_cloud_url = Utility::uploadFileToCloudinary($params['file']);
-
-        if (isset($file_cloud_url['status']) && $file_cloud_url['status'] == false) {
-          return $file_cloud_url;
-        }
-
-        $email_payload = [
-          'to' => $client->email,
-          'subject' => 'ID Verification Request Received Pending Approval',
-          'body' => [
-            'first_name' => $client->first_name
-          ],
-          'view' => 'email.client.id_verification_request'
-        ];
-
-        $email_response =  Utility::sendEmail($email_payload);
-
-        if (
-          isset($email_response['status']) && $email_response['status'] == false
-        ) {
-          DB::rollBack();
-          return $email_response;
-        }
-        // change verification status to processing
-        //if(User::)
-
-        $theupdate = User::where('id', $client->id)->update([
-          'client_id_verification_status' => TestStatus::IN_PROGRESS,
-          'id_file_url' => Utility::picture_path_implode_explode($client->id_file_url, $file_cloud_url)
-        ]);
-        DB::commit();
-
-        return $theupdate;
-      } catch (\Exception $e) {
-        DB::rollBack();
-        throw $e;
-      }
-    }
-  }
-
-  public function clientRequestForBNPL($client_id, $params)
-  {
-    DB::beginTransaction();
-
-    try {
-      $bnpl = new BuyNowPayLaterRequest;
-      $bnpl->client_id = $client_id;
-      $bnpl->reason = $params['reason'];
-      $bnpl->facebook_link = $params['facebook_link'] ?? '';
-      $bnpl->twitter_link = $params['twitter_link'] ?? '';
-      $bnpl->instagram_link = $params['instagram_link'] ?? '';
-      $bnpl->linkedin_link = $params['linkedin_link'] ?? '';
-      $bnpl->save();
-
-      User::where([
-        ['role', UserRole::USER],
-        ['id', $client_id]
-      ])->update([
-        'client_buy_now_pay_later_status' => TestStatus::IN_PROGRESS
-      ]);
-      DB::commit();
-      return true;
-    } catch (\Exception $e) {
-      DB::rollBack();
-      throw $e;
-    }
   }
 
   public function suspendUser($params)

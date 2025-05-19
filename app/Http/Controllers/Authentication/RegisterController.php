@@ -145,17 +145,17 @@ class RegisterController extends Controller
         $token = $this->genResetCode();
         $signature = hash('md5', $token);
         $exists = APIPasswordResetTokenModel::where([
-          ['user_id', $user->id],
+          ['email', $user->email],
           ['token_signature', $signature],
         ])->exists();
       } while ($exists);
 
-      $password_reset_link = env('FRONTEND_APP_URL', 'https://bizgrowthhackerz.com/') . 'resetpassword?token=' . $token . '&email=' . $email;
+      $password_reset_link = env('FRONTEND_APP_URL', 'localhost:5173/') . 'resetpassword?token=' . $token . '&email=' . $email;
 
       Mail::to($email)->send(new PasswordResetLink($password_reset_link, $user->first_name));
 
       APIPasswordResetTokenModel::create([
-        'user_id' => $user->id,
+        'email' => $user->email,
         'token_signature' => $signature,
         'expires_at' => Carbon::now()->timezone('Africa/Lagos')->addMinutes(30),
         'token_type' => 'PASSWORD_RESET_TOKEN',
