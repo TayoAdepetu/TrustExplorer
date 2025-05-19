@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('token_signature');
             $table->string('token_type');
             $table->timestamp("expires_at");
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
 
             $table->foreign('email')->references('email')->on('users')->onDelete('cascade');
 
