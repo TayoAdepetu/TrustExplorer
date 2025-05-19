@@ -1,13 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Authentication\LoginController;
 
-Route::post('/register', [LoginController::class, 'register']);
-Route::post('login', [LoginController::class, 'login']);
+
+Route::post('/register', 'Authentication\RegisterController@registerUser');
+Route::get('/login', 'Authentication\LoginController@loginUser');
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('me', [LoginController::class, 'me']);
-    Route::post('logout', [LoginController::class, 'logout']);
-    Route::post('refresh', [LoginController::class, 'refresh']);
+    Route::get('/logout', 'Authentication\LoginController@logout');
+    Route::get('/refresh', 'Authentication\LoginController@refresh');
 });
