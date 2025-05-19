@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Authentication\LoginController;
 
-Route::post('register', [LoginController::class, 'register']);
+Route::post('/register', [LoginController::class, 'register']);
 Route::post('login', [LoginController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
