@@ -13,7 +13,6 @@ use App\Constants\EmailVerificationStatus;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Repositories\Interfaces\UserRepositoryInterface;
-use App\Repositories\Interfaces\ManageTestLinkRepositoryInterface;
 use App\Repositories\Interfaces\EmailVerificationTokenRepositoryInterface;
 use App\Repositories\Interfaces\PaymentTransferRecipientRepositoryInterface;
 
@@ -30,14 +29,10 @@ class AuthService
   public function __construct(
     UserRepositoryInterface $userRepo,
     EmailVerificationTokenRepositoryInterface $emailVerificationRepo,
-    ManageTestLinkRepositoryInterface $manageTestLinkRepo,
-    PaymentTransferRecipientRepositoryInterface $paymentTransferRepos,
     JWTAuth $jwtAuth
   ) {
     $this->userRepo = $userRepo;
     $this->emailVerificationRepo = $emailVerificationRepo;
-    $this->manageTestLinkRepo = $manageTestLinkRepo;
-    $this->paymentTransferRepos = $paymentTransferRepos;
     $this->jwtAuth = $jwtAuth;
   }
 
