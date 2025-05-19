@@ -27,8 +27,7 @@ class UserRepository implements UserRepositoryInterface
     $new_user->first_name = $params['first_name'];
     $new_user->last_name = $params['last_name'];
     $new_user->email = $params['email'];
-    $new_user->role_state = $params['role'];
-    $new_user->wmb = $params['role'] == "Freelancer" ? "ADMITTED" : null;
+    $new_user->role = $params['role'];
     $new_user->password = $params['password'];
     $new_user->public_reference_id = $public_reference_id;
     $new_user->avatar = config('chatify.user_avatar.default');
