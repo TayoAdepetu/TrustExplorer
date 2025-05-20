@@ -6,6 +6,7 @@ use App\Repositories\Interfaces\EmailVerificationTokenRepositoryInterface;
 use App\Models\APIPasswordResetTokenModel;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class EmailVerificationTokenRepository implements EmailVerificationTokenRepositoryInterface
 {
@@ -25,10 +26,17 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
 
   public function findToken($request)
   {
-    return APIPasswordResetTokenModel::where([
-        ['token_signature',  $request->token],
-        ['email', $request->email],
-        ['token_type', 'EMAIL_VERIFICATION_TOKEN']
-    ])->first(); 
+    $tokens = APIPasswordResetTokenModel::where([
+      ['email', $request->email],
+      ['token_type', 'EMAIL_VERIFICATION_TOKEN']
+    ])->get();
+
+    foreach ($tokens as $token) {
+      if (Hash::check($request->token, $token->token_signature)) {
+        return $token; // token is valid
+      }
+    }
+
+    return null; // no valid token found
   }
 }
