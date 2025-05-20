@@ -32,7 +32,7 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
     ])->get();
 
     foreach ($tokens as $token) {
-      if ((Hash::check($request->token, $token->token_signature)) && Carbon::now()->timezone('Africa/Lagos')->lessThan($token->expires_at)) {
+      if (Hash::check($request->token, $token->token_signature)) {
         return $token; // token is valid
       }
     }
