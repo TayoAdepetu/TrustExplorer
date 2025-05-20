@@ -18,7 +18,7 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
     $email_token = new APIPasswordResetTokenModel;
     $email_token->email = $email;
     $email_token->token_signature = bcrypt($token);
-    $email_token->expires_at = Carbon::now('Africa/Lagos')->addMinutes(self::TOKEN_EXPIRATION_MINUTE);
+    $email_token->expires_at = Carbon::now()->timezone('Africa/Lagos')->addMinutes(self::TOKEN_EXPIRATION_MINUTE);;
     $email_token->token_type = $token_type;
     $email_token->save();
     return $token;
@@ -29,11 +29,10 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
     $tokens = APIPasswordResetTokenModel::where([
       ['email', $request->email],
       ['token_type', $token_type],
-      // ['expires_at', '>', Carbon::now('Africa/Lagos')],
     ])->get();
 
     foreach ($tokens as $token) {
-      if (Hash::check($request->token, $token->token_signature)) {
+      if ((Hash::check($request->token, $token->token_signature)) && Carbon::now()->timezone('Africa/Lagos')->lessThan($token->expires_at)) {
         return $token; // token is valid
       }
     }
