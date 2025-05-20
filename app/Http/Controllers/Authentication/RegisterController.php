@@ -144,6 +144,8 @@ class RegisterController extends Controller
 
   public function sendPasswordResetLink($email)
   {
+    DB::beginTransaction();
+
     try {
       $user = User::whereRaw('LOWER(email) = ?', [strtolower($email)])->first();
 
@@ -163,16 +165,24 @@ class RegisterController extends Controller
 
       $password_reset_link = env('FRONTEND_APP_URL', 'localhost:5173/') . 'resetpassword?token=' . $token . '&email=' . $email;
 
-      Mail::to($email)->send(new PasswordResetLink($password_reset_link, $user->first_name));
+      $sendMail = Mail::to($email)->send(new PasswordResetLink($password_reset_link, $user->first_name));
 
-      APIPasswordResetTokenModel::create([
-        'email' => $user->email,
-        'token_signature' => $signature,
-        'expires_at' => Carbon::now()->timezone('Africa/Lagos')->addMinutes(30),
-        'token_type' => 'PASSWORD_RESET_TOKEN',
-      ]);
+      if ($sendMail) {
+        APIPasswordResetTokenModel::create([
+          'email' => $user->email,
+          'token_signature' => $signature,
+          'expires_at' => Carbon::now()->timezone('Africa/Lagos')->addMinutes(30),
+          'token_type' => 'PASSWORD_RESET_TOKEN',
+        ]);
 
-      return true;
+        DB::commit();
+
+        return true;
+      }
+
+      DB::rollBack();
+      return false;
+
     } catch (\Throwable $error) {
       DB::rollBack();
       return $this->errorJSONResponse($error->getMessage(), 'Failed', 422);
