@@ -143,11 +143,6 @@ class AuthService
       }
       $user = $user->toArray() + $this->getTokenDetails($token);
 
-
-      $get_writer_recipient_code = $this->paymentTransferRepos->getUserRecipientCode($user['id']);
-
-      $user['recipient_code'] = $get_writer_recipient_code['recipient_code'] ?? null;
-
       return $user;
     } catch (JWTException $exception) {
       return $this->exceptionResponse($exception);
