@@ -87,7 +87,7 @@ class UserService
         return $this->quickErrorResponse('User does not exist');
       }
       // create email verification token
-      $create_token = $this->emailVerificationRepo->createToken($param, 'PASSWORD_RESET_TOKEN');
+      $create_token = $this->emailVerificationRepo->createToken($param->email, 'PASSWORD_RESET_TOKEN');
 
       $password_reset_link = env('FRONTEND_APP_URL', 'localhost:5173/') . 'resetpassword?token=' . $create_token . '&email=' . $param->email;
 
