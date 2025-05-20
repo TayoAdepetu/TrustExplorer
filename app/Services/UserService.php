@@ -88,13 +88,6 @@ class UserService
       return $this->quickErrorResponse("This password reset token is invalid.");
     }
 
-    return $this->quickErrorResponse($get_token);
-    // check if token has expired then delete
-    if (Carbon::parse($get_token->expires_at)->isPast()) {
-      $get_token->delete();
-      return $this->quickErrorResponse("Password reset token has expired. Please request a new token to continue.");
-    }
-
     DB::beginTransaction();
     try {
 
