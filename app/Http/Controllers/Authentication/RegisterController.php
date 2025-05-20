@@ -69,25 +69,21 @@ class RegisterController extends Controller
       return $this->errorJSONResponse("An error occurred", $verify_email['message'], 400);
     }
 
-    return $this->successResponse('Email verified', 'email has been verified successfully', 200);
+    return $this->successResponse(null, 'email has been verified successfully', 200);
   }
 
-  public function completeUserRegistrion(Request $request)
+  public function completePhoneVerification(Request $request)
   {
-    // check user has verified their email before proceeding Rule::requiredIf(Auth::user()->role === UserRole::WRITER)
-    if ($request->user()->email_verification_status === EmailVerificationStatus::PENDING) {
-      return $this->errorJSONResponse(Response::UNAUTHORIZED_ACCESS, "Please verify your email before proceeding", 400);
-    }
 
     try {
       $user =  $request->user();
-      $data = $this->authService->completeRegistration($user);
+      $data = $this->authService->completePhoneVerification($user, $request);
 
       if (isset($data['status']) && $data['status'] == false) {
         return $this->errorJSONResponse("Unable to update user details, please try again", $data['message'], 400);
       }
 
-      return $this->successResponse($data, "Verification Test link sent", 200);
+      return $this->successResponse(null, "Phone number verified successfully", 200);
     } catch (\Exception $e) {
       return $this->errorJSONResponse("An error occurred", $e->getMessage(), 500);
     }
@@ -103,6 +99,21 @@ class RegisterController extends Controller
       }
 
       return $this->successResponse("Link sent", "Email verification link sent successfully", 200);
+    } catch (\Exception $e) {
+      return $this->errorJSONResponse("An error occurred", $e->getMessage(), 500);
+    }
+  }
+
+  public function requestPhoneVerificationCode(Request $request)
+  {
+    try {
+      $data = $this->authService->sendPhoneVerificationCode($request->user());
+
+      if (isset($data['status']) && $data['status'] == false) {
+        return $this->errorJSONResponse(Response::ERR_NOT_SUCCESSFUL, $data['message'], 400);
+      }
+
+      return $this->successResponse(null, "Phone number verification code sent successfully", 200);
     } catch (\Exception $e) {
       return $this->errorJSONResponse("An error occurred", $e->getMessage(), 500);
     }
@@ -146,7 +157,7 @@ class RegisterController extends Controller
         $signature = hash('md5', $token);
         $exists = APIPasswordResetTokenModel::where([
           ['email', $user->email],
-          ['token_signature', $signature],
+          ['token_signature', $signature]
         ])->exists();
       } while ($exists);
 
@@ -161,7 +172,7 @@ class RegisterController extends Controller
         'token_type' => 'PASSWORD_RESET_TOKEN',
       ]);
 
-      return true; // Indicate success
+      return true;
     } catch (\Throwable $error) {
       DB::rollBack();
       return $this->errorJSONResponse($error->getMessage(), 'Failed', 422);

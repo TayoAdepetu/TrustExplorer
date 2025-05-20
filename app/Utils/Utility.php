@@ -4,13 +4,14 @@ namespace App\Utils;
 
 use App\Events\SendNewMail;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Http;
 
 class Utility
 {
   public static function sendEmail(array $params)
   {
     //first attempt to render the template
-    try{
+    try {
       $data = [
         'subject' =>  $params['subject'],
         'to' => $params['to'],
@@ -20,30 +21,48 @@ class Utility
 
       //then Queue it, fire new Email event
       event(new SendNewMail($data));
-    }catch(\Exception $e) {
-      return ["message" => $e->getMessage(), "errorCode" => 500, "status"=> false];
+    } catch (\Exception $e) {
+      return ["message" => $e->getMessage(), "errorCode" => 500, "status" => false];
     }
 
-    return ["message" => "success", "status"=> true];
+    return ["message" => "success", "status" => true];
+  }
+
+  public static function sendOTPViaTermii($to, $message)
+  {
+
+    $baseUrl = 'https://api.ng.termii.com/api/sms/send';
+
+    $response = Http::post($baseUrl, [
+      'api_key' => env('TERMII_API_KEY'),
+      'to' => $to,
+      'from' => env('TERMII_SENDER_ID'),
+      'sms' => $message,
+      'type' => 'plain',
+      'channel' => env('TERMII_CHANNEL', 'dnd'),
+    ]);
+
+    return ["message" => "success", "status" => true];
+
   }
 
   public static function uploadFileToCloudinary($params)
   {
     // Upload any File to Cloudinary with One line of Code
     // $uploadedFileUrl = Cloudinary::uploadFile($params->file('file')->getRealPath())->getSecurePath();
-   
-		$image_name = $params->getRealPath(); 
 
-		//upload image file to cloudinary 
-		try{
+    $image_name = $params->getRealPath();
+
+    //upload image file to cloudinary 
+    try {
       $uploadedFileUrl = Cloudinary::uploadFile($image_name, [
-          'folder' => 'AfriWrites - '.env('APP_ENV').' Files', 
+        'folder' => 'AfriWrites - ' . env('APP_ENV') . ' Files',
       ])->getSecurePath();
 
       return $uploadedFileUrl;
-		}catch(\Exception $e){
-      return ["message" => $e->getMessage(), "http_status" => 500, "status"=> false]; 
-		}
+    } catch (\Exception $e) {
+      return ["message" => $e->getMessage(), "http_status" => 500, "status" => false];
+    }
   }
 
   public static function generateReferenceId()
@@ -51,12 +70,12 @@ class Utility
     return uniqid();
   }
 
-  public static function picture_path_implode_explode($current_path, $new_path) 
+  public static function picture_path_implode_explode($current_path, $new_path)
   {
     $evidence_path = $current_path;
     $files = explode(",", $evidence_path);
     // if at least a file has been previously uploaded
-    if( isset($files[0]) and strlen($files[0]) > 0 ) {
+    if (isset($files[0]) and strlen($files[0]) > 0) {
       array_push($files, $new_path);
       $evidence_path = implode(",", $files);
     } else {

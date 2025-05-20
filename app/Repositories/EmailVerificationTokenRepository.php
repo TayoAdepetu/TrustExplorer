@@ -12,19 +12,19 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
 {
   const TOKEN_EXPIRATION_MINUTE = 60;
 
-  public function createToken($email)
+  public function createToken($email, $token_type)
   {
     $token = Str::random(16);
     $email_token = new APIPasswordResetTokenModel;
     $email_token->email = $email;
     $email_token->token_signature = bcrypt($token);
     $email_token->expires_at = Carbon::now()->addMinutes(self::TOKEN_EXPIRATION_MINUTE);
-    $email_token->token_type = 'EMAIL_VERIFICATION_TOKEN';
+    $email_token->token_type = $token_type;
     $email_token->save();
     return $token;
   }
 
-  public function findToken($request)
+  public function findToken($request, $token_type)
   {
     $tokens = APIPasswordResetTokenModel::where([
       ['email', $request->email],

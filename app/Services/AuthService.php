@@ -45,7 +45,7 @@ class AuthService
       $created_user = $this->userRepo->saveNewUser($params);
 
       // create email verification token
-      $create_token = $this->emailVerificationRepo->createToken($params['email']);
+      $create_token = $this->emailVerificationRepo->createToken($params['email'], 'EMAIL_VERIFICATION_TOKEN');
 
       // send verification email to the user, 
       $email_payload = [
@@ -83,7 +83,7 @@ class AuthService
     }
 
     // get email verification token
-    $get_token = $this->emailVerificationRepo->findToken($request);
+    $get_token = $this->emailVerificationRepo->findToken($request, 'EMAIL_VERIFICATION_TOKEN');
     if (!$get_token) {
       return $this->quickErrorResponse("This email verification token is invalid.");
     }
@@ -98,7 +98,9 @@ class AuthService
     try {
       //update user details for successful email verification
       $user->email_verified_at = Carbon::now();
-      $user->account_status = UserAccountStatus::ACTIVE;
+      if ($user->phone_verified_at !== null) {
+        $user->account_status = UserAccountStatus::ACTIVE;
+      }
       $user->save();
 
       // send email verified email to the user based on their role,
@@ -151,48 +153,56 @@ class AuthService
     );
   }
 
-  public function completeRegistration($user)
+  public function completePhoneVerification($the_user, object $request)
   {
+    // check if user exist with the email
+    $user = $this->userRepo->findUser($the_user->email);
+    if (!$user) {
+      return $this->quickErrorResponse("User does not exist.");
+    }
+
+    // get email verification token
+    $get_token = $this->emailVerificationRepo->findToken($request, 'PHONE_VERIFICATION_TOKEN');
+    if (!$get_token) {
+      return $this->quickErrorResponse("This phone number verification code is invalid.");
+    }
+
+    // check if token has expired then delete
+    if (Carbon::parse($get_token->expires_at)->isPast()) {
+      $get_token->delete();
+      return $this->quickErrorResponse("Phone number verification code has expired. Please request a new code to continue.");
+    }
+
     DB::beginTransaction();
     try {
-      // find user and update their details into the db
-      // $update_user = $this->userRepo->updateUserDetails($params, $user_id);
+      //update user details for successful email verification
 
-      // send a test link to writers so they can continue with the verification process
-      if ($user->role === UserRole::USER) {
+      $user->phone_verified_at = Carbon::now();
+      if ($user->email_verified_at !== null) {
+        $user->account_status = UserAccountStatus::ACTIVE;
+      }
+      $user->save();
 
-        // check if user has completed all the necessary details
-        if (!$user->writing_niches || !$user->skills || !$user->category || !$user->subcategory) {
-          return $this->quickErrorResponse('Request not successful. User has not filled niches and skills categories on profile.');
-        }
+      // send email verified email to the user based on their role,
+      $email_payload = [
+        'to' => $user->email,
+        'subject' => 'Phone Number Verified',
+        'body' => [
+          'first_name' => $user->first_name
+        ],
+      ];
 
-        $test_link = $this->manageTestLinkRepo->getInitalTestLink();
-        if (!$test_link) {
-          return $this->quickErrorResponse('Request not successful. Skills verification questionaire link not available');
-        }
+      $email_payload['view'] = 'email.phone_verified';
 
-        $email_payload = [
-          'to' => $user->email,
-          'subject' => 'Skills Verification Questionaire Link',
-          'body' => [
-            'first_name' => $user->first_name,
-            'test_link' => $test_link->url . '/' . $user->public_reference_id
-          ],
-          'view' => 'email.writer.skills_verification_link_request'
-        ];
+      $email_response =  Utility::sendEmail($email_payload);
 
-        $email_response =  Utility::sendEmail($email_payload);
-
-        if (
-          isset($email_response['status']) && $email_response['status'] == false
-        ) {
-          DB::rollBack();
-          return $email_response;
-        }
+      if (isset($email_response['status']) && $email_response['status'] == false) {
+        DB::rollBack();
+        return $email_response;
       }
 
       DB::commit();
-      return $user;
+      return $get_token->delete();
     } catch (\Exception $e) {
       DB::rollBack();
       throw $e;
@@ -216,7 +226,7 @@ class AuthService
       }
 
       // create email verification token
-      $create_token = $this->emailVerificationRepo->createToken($params['email']);
+      $create_token = $this->emailVerificationRepo->createToken($params['email'], 'EMAIL_VERIFICATION_TOKEN');
 
       // send verification email to the user
       $email_payload = [
@@ -234,6 +244,45 @@ class AuthService
       if (isset($email_response['status']) && $email_response['status'] == false) {
         DB::rollBack();
         return $email_response;
+      }
+
+      DB::commit();
+      return true;
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw $e;
+    }
+  }
+
+  public function sendPhoneVerificationCode($params)
+  {
+    DB::beginTransaction();
+
+    try {
+      // check if user exists
+      $user = $this->userRepo->findUser($params['email']);
+
+      if (!$user) {
+        return $this->quickErrorResponse('User does not exist');
+      }
+
+      // check if user has completed email verification
+      if ($user->phone_verified_at !== null) {
+        return $this->quickErrorResponse('User phone has been verified already.');
+      }
+
+      // create email verification token
+      $create_token = $this->emailVerificationRepo->createToken($params['email'], 'PHONE_VERIFICATION_TOKEN');
+
+      $message = "Your TrustExplorer phone verification code is: $create_token";
+
+      // Use your SMS provider to send the code
+
+      $otp_response = Utility::sendOTPViaTermii($params['phone_number'], $message);
+
+      if (isset($otp_response['status']) && $otp_response['status'] == false) {
+        DB::rollBack();
+        return $otp_response;
       }
 
       DB::commit();

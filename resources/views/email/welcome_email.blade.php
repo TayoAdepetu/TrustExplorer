@@ -12,10 +12,10 @@
                         Hi {{ $body['first_name'] }},</p>
                     <p
                         style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">
-                        <b>Thank you for your interest in joining TrustExplorer <br />Please verify your email by
+                        Thank you for your interest in joining TrustExplorer <br />Please verify your email by
                             clicking on the link below. After verifying your email, you will
                             be able to edit your profile and start using all the amazing features we
-                            offer to protect you and others from potential fraudulent deals on the internet. </b>
+                            offer to protect you and others from potential fraudulent deals on the internet.
                     </p>
                     <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary"
                         style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">

@@ -28,6 +28,7 @@ return new class extends Migration
             $table->enum('account_status',['Active', 'Inactive', 'Suspended'])->default('Inactive');
             $table->longText('suspension_note')->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('phone_verified_at')->nullable();
             $table->timestamp('last_seen')->nullable();
             $table->string('password');
             $table->timestamps();

@@ -12,7 +12,7 @@
                         Hi {{ $body['first_name'] }},</p>
                     <p
                         style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">
-                        Congratulations, your email has been successfully verified!<br />
+                        Congratulations, your phone number has been successfully verified!<br />
                             Now you can edit your profile and make use of all the exciting features TrustExplorer
                             offers to protect you and others from potential fraudulent deals on the internet. 
                     </p>
