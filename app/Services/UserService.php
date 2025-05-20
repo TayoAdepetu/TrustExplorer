@@ -85,8 +85,7 @@ class UserService
     $get_token = $this->emailVerificationRepo->findToken($param, 'PASSWORD_RESET_TOKEN');
     
     if (!$get_token) {
-      Log::info("Trying to match token: " . $get_token);
-      return $this->quickErrorResponse("This password reset token is invalid.".$get_token);
+      return $this->quickErrorResponse("This password reset token is invalid.");
     }
 
     // check if token has expired then delete
