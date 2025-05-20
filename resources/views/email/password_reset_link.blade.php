@@ -33,7 +33,7 @@
             </tbody>
           </table>
           <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">
-            <b>Thank you,<br />Team BizGrowthHackerz</b>
+            <b>Thank you,<br />Team TrustExplorer</b>
           </p>
         </td>
       </tr>

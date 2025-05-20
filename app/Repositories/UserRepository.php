@@ -190,9 +190,9 @@ class UserRepository implements UserRepositoryInterface
     return $user;
   }
 
-  public function updatePassword($params, $user_id)
+  public function updatePassword($param, $user_id)
   {
-    $password = bcrypt($params['password']);
+    $password = bcrypt($param->password);
     $user = User::find($user_id);
     $user->password = $password;
     $user->save();

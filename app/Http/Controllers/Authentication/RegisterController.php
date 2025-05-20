@@ -168,45 +168,15 @@ class RegisterController extends Controller
         return $this->errorJSONResponse('Password and Confirm Password did not match.', 'Failed', 422);
       }
 
-
-      $data = $validator->validated();
-
-      // Check if token exists and is valid
-      $tokenSignature = hash('md5', $data['password_token']);
-      $verifyToken = APIPasswordResetTokenModel::where('token_signature', $tokenSignature)
-        ->where('token_type', 'PASSWORD_RESET_TOKEN')
-        ->first(); // Use 'first' to get the specific token
-
-      if (!$verifyToken) {
-        return $this->errorJSONResponse('Invalid Token for Resetting Password.', 'Failed', 422);
-      }
-
-      // Check if token has expired
-      if (Carbon::now()->timezone('Africa/Lagos')->greaterThan($verifyToken->expires_at)) {
-        // Delete expired token
-        $verifyToken->delete();
-        return $this->errorJSONResponse('Token already expired.', 'Failed', 422);
-      }
-
-      // Find the user associated with the token
-      $user = User::where('email', $data['email'])->first();
-
-      if (!$user) {
-        return $this->errorJSONResponse('Token does not correspond to any existing user.', 'Failed', 422);
-      }
-
       // Update the user's password
-      $newPassword = bcrypt($data['password']);
-      $user->update([
-        'password' => $newPassword
-      ]);
+      $reSet = $this->userService->updateUserPassword($request);
 
-      // Delete the token after successful password reset
-      $verifyToken->delete();
+      if (isset($reSet['status']) && $reSet['status'] == false) {
+        return $this->errorJSONResponse(Response::ERR_NOT_SUCCESSFUL, $reSet['message'], 400);
+      }
 
-      DB::commit();
+      return $this->successResponse(null, 'Password reset successful.');
 
-      return $this->successResponse($user);
     } catch (\Exception $error) {
       DB::rollBack();
       return $this->errorJSONResponse($error->getMessage(), 'Failed', 422);

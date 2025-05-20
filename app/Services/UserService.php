@@ -2,18 +2,19 @@
 
 namespace App\Services;
 
-use App\Utils\Utility;
+use Carbon\Carbon;
 use App\Models\User;
+use App\Utils\Utility;
 use App\Constants\UserRole;
 use App\Constants\TestStatus;
+use Illuminate\Support\Facades\DB;
 use App\Constants\UserAccountStatus;
-use App\Models\BuyNowPayLaterRequest;
 use App\Traits\ReturnsJsonResponses;
 use Illuminate\Support\Facades\Hash;
+use App\Models\BuyNowPayLaterRequest;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\JobsProposalRepositoryInterface;
 use App\Repositories\Interfaces\WriterPortfolioRepositoryInterface;
-use Illuminate\Support\Facades\DB;
 use App\Repositories\Interfaces\EmailVerificationTokenRepositoryInterface;
 
 class UserService
@@ -67,13 +68,60 @@ class UserService
     }
   }
 
-  public function updateUserPassword($params, $user_details)
+  public function updateUserPassword($param)
   {
-    if (Hash::check($params['password'], $user_details->password)) {
+    // check if user exist with the email
+    $user = $this->userRepo->findUser($param->email);
+    if (!$user) {
+      return $this->quickErrorResponse("User with this e-mail address does not exist.");
+    }
+
+    if (Hash::check($param->password, $user->password)) {
       return $this->errorResponse('Password has been used recently. Please use a new password');
     }
 
-    return $this->userRepo->updatePassword($params, $user_details->id);
+    // get email verification token
+    $get_token = $this->emailVerificationRepo->findToken($param, 'PASSWORD_RESET_TOKEN');
+    
+    if (!$get_token) {
+      return $this->quickErrorResponse("This password reset token is invalid.");
+    }
+
+    // check if token has expired then delete
+    if (Carbon::parse($get_token->expires_at)->isPast()) {
+      $get_token->delete();
+      return $this->quickErrorResponse("Password reset token has expired. Please request a new token to continue.");
+    }
+
+    DB::beginTransaction();
+    try {
+
+      return $this->userRepo->updatePassword($param, $user->id);      
+
+      // send email verified email to the user based on their role,
+      $email_payload = [
+        'to' => $user->email,
+        'subject' => 'Password Reset Successful',
+        'body' => [
+          'first_name' => $user->first_name
+        ],
+      ];
+
+      $email_payload['view'] = 'email.password_reset_successful';
+
+      $email_response =  Utility::sendEmail($email_payload);
+
+      if (isset($email_response['status']) && $email_response['status'] == false) {
+        DB::rollBack();
+        return $email_response;
+      }
+
+      DB::commit();
+      return $get_token->delete();
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw $e;
+    }
   }
 
   public function getPasswordResetToken($param)
