@@ -97,7 +97,7 @@ class UserService
         'subject' => 'Request Password Reset Link',
         'body' => [
           'first_name' => $user->first_name,
-          'email_verification_link' => $password_reset_link
+          'password_reset_link' => $password_reset_link
         ],
         'view' => 'email.password_reset_link'
       ];
