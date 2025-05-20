@@ -137,8 +137,8 @@ class RegisterController extends Controller
 
       $resetLinkSent = $this->userService->getPasswordResetToken($request);
 
-      if (!$resetLinkSent) {
-        return $this->errorJSONResponse('Unable to send password reset link.', 'Failed', 422);
+      if (isset($resetLinkSent['status']) && $resetLinkSent['status'] == false) {
+        return $this->errorJSONResponse(Response::ERR_NOT_SUCCESSFUL, $resetLinkSent['message'], 400);
       }
 
       return $this->successResponse(null, 'A password reset link has been sent to your email.');
