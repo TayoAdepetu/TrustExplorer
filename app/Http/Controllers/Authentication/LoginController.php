@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Constants\Response;
 use Illuminate\Http\Request;
 use App\Services\AuthService;
+use App\Services\UserService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
@@ -27,10 +28,12 @@ class LoginController extends Controller
   use ReturnsJsonResponses;
 
   protected $authService;
+  protected $userService;
 
-  public function __construct(AuthService $authService)
+  public function __construct(AuthService $authService, UserService $userService)
   {
     $this->authService = $authService;
+    $this->userService = $userService;
   }
 
   public function loginUser(LoginRequest $request)
@@ -66,6 +69,12 @@ class LoginController extends Controller
     } catch (\Exception $e) {
       return $this->errorJSONResponse("An error occurred", $e->getMessage(), 500);
     }
+  }
+
+  public function getUserDetail($user_ref)
+  {
+    $user = $this->userService->getUserProfile($user_ref);
+    return $this->successResponse($user, "User Details");
   }
 
   public function logout()

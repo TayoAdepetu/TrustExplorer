@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('username')->unique()->index();
             $table->enum('role', ['Admin', 'Normal_User'])->default('Normal_User');
             $table->string('email')->unique();
             $table->string('public_reference_id')->unique()->nullable();
@@ -55,6 +56,7 @@ return new class extends Migration
         DB::table('users')->insert([
             'first_name' => "Theadmin",
             'last_name' => "Test",
+            'username' => "TheAdminTest",
             'email' => "admintrustexplorer@test.com",
             'role' => 'Admin',
             'email_verified_at' => now(),
@@ -68,6 +70,7 @@ return new class extends Migration
           DB::table('users')->insert([
             'first_name' => "Demo",
             'last_name' => "User1",
+            'username' => "TheDemoUser1",
             'email' => "monnifysupport@test.com",
             'role' => 'Normal_User',
             'email_verified_at' => now(),
@@ -81,6 +84,7 @@ return new class extends Migration
           DB::table('users')->insert([
             'first_name' => "Monnify",
             'last_name' => "Client1",
+            'username' => "TheMonnifyClient1",
             'email' => "monnifysupportclient@test.com",
             'role' => 'Normal_User',
             'email_verified_at' => now(),

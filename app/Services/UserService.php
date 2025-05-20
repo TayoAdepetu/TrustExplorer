@@ -72,14 +72,12 @@ class UserService
     return $this->userRepo->updatePassword($params, $user_details->id);
   }
 
-  public function getWriterProfile($public_reference_id)
+  public function getUserProfile($public_reference_id)
   {
     $user = $this->userRepo->findUserByPublicReferenceID($public_reference_id);
     if (!$user) {
       return null;
     }
-
-    $user['jobs'] =  $this->jobsProposalRepository->getWriterCompletedJobProposals($user->id);
 
     return $user;
   }

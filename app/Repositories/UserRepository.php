@@ -200,27 +200,16 @@ class UserRepository implements UserRepositoryInterface
   public function findUserByPublicReferenceID($public_reference_id)
   {
     return User::select([
-      'id',
       'public_reference_id',
       'first_name',
       'last_name',
-      'role',
-      'availability',
-      'skills',
-      'writing_niches',
+      'role',      
       'username',
-      'profile_picture',
       'avatar',
-      'category',
       'country',
-      'about_me',
-      'languages',
       'suspension_note',
-      'biz_name_slug',
-      'writer_stage_one_test_status',
-    ])->wherePublicReferenceId($public_reference_id)->with('portfolio', 'academic', 'portfoliovideo', 'employment')->first();
+    ])->wherePublicReferenceId($public_reference_id)->first();
   }
-
 
   public function getVerifiedWriters()
   {
