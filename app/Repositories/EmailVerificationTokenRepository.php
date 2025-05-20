@@ -28,7 +28,7 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
     return APIPasswordResetTokenModel::where([
         ['token_signature',  bcrypt($request->token)],
         ['email', $request->email],
-        ['token_type', 'EMAIL_VERIFICATION_TOKEN']
+        // ['token_type', 'EMAIL_VERIFICATION_TOKEN']
     ])->first(); 
   }
 }
