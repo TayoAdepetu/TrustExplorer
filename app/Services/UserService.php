@@ -8,6 +8,7 @@ use App\Utils\Utility;
 use App\Constants\UserRole;
 use App\Constants\TestStatus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Constants\UserAccountStatus;
 use App\Traits\ReturnsJsonResponses;
 use Illuminate\Support\Facades\Hash;
@@ -84,6 +85,7 @@ class UserService
     $get_token = $this->emailVerificationRepo->findToken($param, 'PASSWORD_RESET_TOKEN');
     
     if (!$get_token) {
+      Log::info("Trying to match token: " . $get_token);
       return $this->quickErrorResponse("This password reset token is invalid.");
     }
 
