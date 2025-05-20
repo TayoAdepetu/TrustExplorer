@@ -86,7 +86,7 @@ class UserService
     
     if (!$get_token) {
       Log::info("Trying to match token: " . $get_token);
-      return $this->quickErrorResponse("This password reset token is invalid.");
+      return $this->quickErrorResponse("This password reset token is invalid.".$get_token);
     }
 
     // check if token has expired then delete
