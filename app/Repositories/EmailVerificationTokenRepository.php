@@ -29,7 +29,7 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
     $tokens = APIPasswordResetTokenModel::where([
       ['email', $request->email],
       ['token_type', $token_type],
-      ['expires_at', '>', now()->timezone(config('app.timezone'))],
+      ['expires_at', '>', now()->timezone('Africa/Lagos')],
     ])->get();
 
     foreach ($tokens as $token) {
