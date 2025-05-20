@@ -81,7 +81,7 @@ class LoginController extends Controller
   {
     Auth::logout();
 
-    return $this->successResponse("Successfully logged out");
+    return $this->successResponse(null,"Successfully logged out");
   }
 
   public function refresh()
