@@ -83,6 +83,10 @@ class UserService
 
     // get email verification token
     $get_token = $this->emailVerificationRepo->findToken($param, 'PASSWORD_RESET_TOKEN');
+
+    if ($get_token) {
+      return $this->quickErrorResponse("This password reset token is invalid." . $get_token);
+    }
     
     if (!$get_token) {
       return $this->quickErrorResponse("This password reset token is invalid.");

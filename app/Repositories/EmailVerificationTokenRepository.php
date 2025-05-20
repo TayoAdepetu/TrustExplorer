@@ -31,11 +31,15 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
       ['token_type', $token_type],
     ])->get();
 
+    return $tokens;
+
     foreach ($tokens as $token) {
       if (Hash::check($request->token, $token->token_signature)) {
         return $token; // token is valid
       }
     }
+
+    // && Carbon::now()->timezone('Africa/Lagos')->lessThan($token->expires_at)
 
     return null; // no valid token found
   }
