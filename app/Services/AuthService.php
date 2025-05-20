@@ -103,7 +103,6 @@ class AuthService
     DB::beginTransaction();
     try {
       //update user details for successful email verification
-      $user->email_verification_status = EmailVerificationStatus::COMPLETED;
       $user->email_verified_at = Carbon::now();
       $user->account_status = UserAccountStatus::ACTIVE;
       $user->save();
@@ -218,7 +217,7 @@ class AuthService
       }
 
       // check if user has completed email verification
-      if ($user->email_verification_status == EmailVerificationStatus::COMPLETED) {
+      if ($user->email_verified_at !== null) {
         return $this->quickErrorResponse('User email has been verified already');
       }
 

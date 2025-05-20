@@ -13,7 +13,6 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
 
   public function createToken($email)
   {
-
     $email_token = new APIPasswordResetTokenModel;
     $email_token->email = $email;
     $email_token->token_signature = bcrypt(Str::random(16));
@@ -26,8 +25,9 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
   public function findToken($request)
   {
     return APIPasswordResetTokenModel::where([
-        ['token', $request->token],
-        ['email', $request->email]
+        ['token_signature',  bcrypt($request->token)],
+        ['email', $request->email],
+        ['token_type', 'EMAIL_VERIFICATION_TOKEN']
     ])->first(); 
   }
 }
