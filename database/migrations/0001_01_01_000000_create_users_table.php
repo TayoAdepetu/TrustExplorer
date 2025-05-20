@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('public_reference_id')->unique()->nullable();
             $table->string('avatar')->default(config('chatify.user_avatar.default'));
             $table->string('gender')->nullable();
-            $table->string('phone_number')->nullable()->unique();
+            $table->string('phone_number')->unique();
             $table->string('country')->nullable();
             $table->enum('account_status',['Active', 'Inactive', 'Suspended'])->default('Inactive');
             $table->longText('suspension_note')->nullable();
@@ -57,6 +57,7 @@ return new class extends Migration
             'first_name' => "Theadmin",
             'last_name' => "Test",
             'username' => "TheAdminTest",
+            'phone_number' => "07023415678",
             'email' => "admintrustexplorer@test.com",
             'role' => 'Admin',
             'email_verified_at' => now(),
@@ -71,6 +72,7 @@ return new class extends Migration
             'first_name' => "Demo",
             'last_name' => "User1",
             'username' => "TheDemoUser1",
+            'phone_number' => "08043715678",
             'email' => "monnifysupport@test.com",
             'role' => 'Normal_User',
             'email_verified_at' => now(),
@@ -85,6 +87,7 @@ return new class extends Migration
             'first_name' => "Monnify",
             'last_name' => "Client1",
             'username' => "TheMonnifyClient1",
+            'phone_number' => "08123567865",
             'email' => "monnifysupportclient@test.com",
             'role' => 'Normal_User',
             'email_verified_at' => now(),

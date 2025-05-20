@@ -28,6 +28,7 @@ class RegisterUserRequest extends BaseFormRequest
       // "g_recaptcha_response" => "required",
       "first_name" => "required|string",
       "last_name" => "required|string",
+      "phone_number" => "required|string",
       // "role" => [
       //   'required',
       //   Rule::in(['Admin', 'Normal_User'])

@@ -27,6 +27,7 @@ class UserRepository implements UserRepositoryInterface
     $new_user->first_name = $params['first_name'];
     $new_user->last_name = $params['last_name'];
     $new_user->email = $params['email'];
+    $new_user->phone_number = $params['phone_number'];
     // $new_user->role = $params['role'];
     $new_user->password = $params['password'];
     $new_user->public_reference_id = $public_reference_id;
