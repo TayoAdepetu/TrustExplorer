@@ -14,6 +14,7 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\JobsProposalRepositoryInterface;
 use App\Repositories\Interfaces\WriterPortfolioRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\Interfaces\EmailVerificationTokenRepositoryInterface;
 
 class UserService
 {
@@ -22,11 +23,14 @@ class UserService
   protected $userRepo;
   protected $portfolioRepo;
   protected $jobsProposalRepository;
+  protected $emailVerificationRepo;
 
   public function __construct(
     UserRepositoryInterface $userRepo,
+    EmailVerificationTokenRepositoryInterface $emailVerificationRepo,
   ) {
     $this->userRepo = $userRepo;
+    $this->emailVerificationRepo = $emailVerificationRepo;
   }
 
   public function updateUserDetails($params, $user_id)
@@ -70,6 +74,47 @@ class UserService
     }
 
     return $this->userRepo->updatePassword($params, $user_details->id);
+  }
+
+  public function getPasswordResetToken($param)
+  {
+    DB::beginTransaction();
+    try {
+      // check if user exists
+      $user = $this->userRepo->findUser($param->email);
+
+      if (!$user) {
+        return $this->quickErrorResponse('User does not exist');
+      }
+      // create email verification token
+      $create_token = $this->emailVerificationRepo->createToken($param, 'PASSWORD_RESET_TOKEN');
+
+      $password_reset_link = env('FRONTEND_APP_URL', 'localhost:5173/') . 'resetpassword?token=' . $create_token . '&email=' . $param->email;
+
+      // send verification email to the user
+      $email_payload = [
+        'to' => $user->email,
+        'subject' => 'Request Password Reset Link',
+        'body' => [
+          'first_name' => $user->first_name,
+          'email_verification_link' => $password_reset_link
+        ],
+        'view' => 'email.password_reset_link'
+      ];
+
+      $email_response =  Utility::sendEmail($email_payload);
+
+      if (isset($email_response['status']) && $email_response['status'] == false) {
+        DB::rollBack();
+        return $email_response;
+      }
+
+      DB::commit();
+      return true;
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw $e;
+    }
   }
 
   public function getUserProfile($public_reference_id)

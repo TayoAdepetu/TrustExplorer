@@ -28,7 +28,7 @@ class EmailVerificationTokenRepository implements EmailVerificationTokenReposito
   {
     $tokens = APIPasswordResetTokenModel::where([
       ['email', $request->email],
-      ['token_type', 'EMAIL_VERIFICATION_TOKEN'],
+      ['token_type', $token_type],
       ['expires_at', '>', Carbon::now()],
     ])->get();
 

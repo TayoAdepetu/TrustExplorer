@@ -19,16 +19,21 @@ use App\Models\APIPasswordResetTokenModel;
 use App\Http\Requests\ConfirmRegistrationEmailRequest;
 use App\Mail\PasswordResetLink;
 use Illuminate\Support\Facades\Http;
+use App\Services\UserService;
 
 class RegisterController extends Controller
 {
   use ReturnsJsonResponses;
 
   protected $authService;
+  protected $userService;
 
-  public function __construct(AuthService $authService)
+
+  public function __construct(AuthService $authService, UserService $userService)
   {
     $this->authService = $authService;
+    $this->userService = $userService;
+
   }
 
   public function registerUser(RegisterUserRequest $request)
@@ -98,7 +103,7 @@ class RegisterController extends Controller
         return $this->errorJSONResponse(Response::ERR_NOT_SUCCESSFUL, $data['message'], 400);
       }
 
-      return $this->successResponse("Link sent", "Email verification link sent successfully", 200);
+      return $this->successResponse(null, "Email verification link sent successfully", 200);
     } catch (\Exception $e) {
       return $this->errorJSONResponse("An error occurred", $e->getMessage(), 500);
     }
@@ -130,61 +135,14 @@ class RegisterController extends Controller
         return $this->errorJSONResponse($validator->errors()->first(), 'Failed', 422);
       }
 
-      $resetLinkSent = $this->sendPasswordResetLink($request->email);
+      $resetLinkSent = $this->userService->getPasswordResetToken($request);
 
       if (!$resetLinkSent) {
         return $this->errorJSONResponse('Unable to send password reset link.', 'Failed', 422);
       }
 
-      return $this->successResponse($resetLinkSent, 'A password reset link has been sent to your email.');
+      return $this->successResponse(null, 'A password reset link has been sent to your email.');
     } catch (\Throwable $error) {
-      return $this->errorJSONResponse($error->getMessage(), 'Failed', 422);
-    }
-  }
-
-  public function sendPasswordResetLink($email)
-  {
-    DB::beginTransaction();
-
-    try {
-      $user = User::whereRaw('LOWER(email) = ?', [strtolower($email)])->first();
-
-      if (!$user) {
-        DB::rollBack();
-        return $this->errorJSONResponse('User not found for the given email.', 'Failed', 422);
-      }
-
-      do {
-        $token = $this->genResetCode();
-        $signature = hash('md5', $token);
-        $exists = APIPasswordResetTokenModel::where([
-          ['email', $user->email],
-          ['token_signature', $signature]
-        ])->exists();
-      } while ($exists);
-
-      $password_reset_link = env('FRONTEND_APP_URL', 'localhost:5173/') . 'resetpassword?token=' . $token . '&email=' . $email;
-
-      $sendMail = Mail::to($email)->send(new PasswordResetLink($password_reset_link, $user->first_name));
-
-      if ($sendMail) {
-        APIPasswordResetTokenModel::create([
-          'email' => $user->email,
-          'token_signature' => $signature,
-          'expires_at' => Carbon::now()->timezone('Africa/Lagos')->addMinutes(30),
-          'token_type' => 'PASSWORD_RESET_TOKEN',
-        ]);
-
-        DB::commit();
-
-        return true;
-      }
-
-      DB::rollBack();
-      return false;
-
-    } catch (\Throwable $error) {
-      DB::rollBack();
       return $this->errorJSONResponse($error->getMessage(), 'Failed', 422);
     }
   }
