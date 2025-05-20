@@ -89,7 +89,7 @@ class AuthService
     }
 
     // check if token has expired then delete
-    if (Carbon::parse($get_token->token_expires_at)->isPast()) {
+    if (Carbon::parse($get_token->expires_at)->isPast()) {
       $get_token->delete();
       return $this->quickErrorResponse("Email verification token has expired. Please request a new token to continue.");
     }
