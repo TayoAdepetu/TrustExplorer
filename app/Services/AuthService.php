@@ -53,15 +53,9 @@ class AuthService
         'subject' => 'Verify Your Email Address For Registration',
         'body' => [
           'first_name' => $created_user->first_name,
-          'email_verification_link' => env('FRONTEND_APP_URL') . 'verify?token=' . $create_token->token . '&email=' . $create_token->email
+          'email_verification_link' => env('FRONTEND_APP_URL') . 'verify?token=' . $create_token . '&email=' . $params['email']
         ],
       ];
-
-      // if ($created_user->role === UserRole::WRITER) {
-      //   $email_payload['view'] = 'email.writer.welcome_email';
-      // } elseif ($created_user->role === UserRole::CLIENT) {
-      //   $email_payload['view'] = 'email.client.welcome_email';
-      // }
 
       $email_payload['view'] = 'email.welcome_email';
 
